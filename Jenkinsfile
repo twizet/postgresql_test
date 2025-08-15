@@ -67,7 +67,7 @@ pipeline {
                 psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -c "
                 INSERT INTO users (name, email, active) VALUES
                                   ('Vasia','vassia@gmail.com',false),
-                                  ('Kolia','kolich12@gmail.com'),
+                                  ('Kolia','kolich12@gmail.com',true),
                                   ('Katia','ekatrina@gmail.com',true),
                                   ('Sofia','sof4a@gmail.com',true);
                 SELECT * FROM users;
