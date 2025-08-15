@@ -69,13 +69,16 @@ pipeline {
                                   ('Vasia','vassia@gmail.com',false),
                                   ('Kolia','kolich12@gmail.com',true),
                                   ('Katia','ekatrina@gmail.com',true),
-                                  ('Sofia','sof4a@gmail.com',true);
+                                  ('Sofia','sof4a@gmail.com',true),
+                                  ('Ivan', 'ivanamerica@gmail.com', true);
                 SELECT * FROM users;
                 INSERT INTO credentials (login, password_hash, user_id) VALUES
                                         ('vasia', 'vasiawd3i323', 1),
                                         ('kolich', 'kolikanabolik2', 2),
                                         ('katin', 'kotioa221', 3),
+                                        ('ivanchik', 'dqwddqdqed',5),
                                         ('fastsofa', 'biwewwef11231', 4);
+
                 SELECT * FROM credentials;
                 INSERT INTO orders (product, quantity, user_id) VALUES
                                    ('grusha', 4, 2),
@@ -87,7 +90,70 @@ pipeline {
                 '''
             }
         }
-        
+        stage('SELECT data and JOINs'){
+            steps{
+                echo "SELECT section..."
+                sh '''
+                psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -c "
+                SELECT name, email FROM users;
+                SELECT * FROM users WHERE active=TRUE;
+                SELECT * FROM orders ORDER BY created_at DESC;
+                "
+                '''
+                echo "JOIN section..."
+                sh '''
+                psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -c "
+                SELECT orders.product, users.name FROM users JOIN orders ON users.id = orders.user_id;
+                SELECT users.name, orders.product FROM users LEFT JOIN orders ON users.id = orders.user_id ORDER BY users.id;
+                SELECT users.name, orders.product FROM users RIGHT JOIN orders ON users.id = orders.user_id;
+                SELECT users.name, credentials.login FROM users JOIN credentials ON users.id = credentials.user_id;
+                "
+                '''
+            }
+        }
+        stage('Update Data'){
+            steps{
+                echo "Updating data..."
+                sh '''
+                psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -c "
+                UPDATE users SET active = false WHERE email = 'kolich12@gmail.com';
+                SELECT * FROM users WHERE name = 'Kolia';
+
+                UPDATE orders SET quantity = 3 WHERE id = 3 AND user_id = 4;
+                SELECT * FROM orders WHERE user_id = 4;
+
+                UPDATE credentials SET password_hash='aaaaaaaaaaa1234' WHERE user_id = 1;
+                SELECT * FROM credentials WHERE user_id  = 1;
+                "
+                '''
+            }
+        }
+        stage('Delete Data'){
+            steps{
+                echo "Deleting data...";
+                sh '''
+                psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -c "
+                DELETE FROM users WHERE id = 2;
+                SELECT * FROM users;
+                SELECT * FROM orders WHERE user_id = 2;
+                SELECT * FROM credentials WHERE user_id = 2;
+
+                DELETE FROM orders WHERE product = 'borukva';
+                SELECT * FROM orders;
+                "
+                '''
+            }
+        }
+        stage('Explain Indexes'){
+            steps{
+                echo "Checking if INDEX used for...";
+                sh '''
+                psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -c "
+                EXPLAIN SELECT * FROM users WHERE email = 'ekatrina@gmail.com';
+                "
+                '''
+            }
+        }
     }
     post{
         always{
