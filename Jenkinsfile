@@ -71,10 +71,23 @@ pipeline {
                                   ('Katia','ekatrina@gmail.com',true),
                                   ('Sofia','sof4a@gmail.com',true);
                 SELECT * FROM users;
+                INSERT INTO credentials (login, password_hash, user_id) VALUES
+                                        ('vasia', 'vasiawd3i323', 1),
+                                        ('kolich', 'kolikanabolik2', 2),
+                                        ('katin', 'kotioa221', 3),
+                                        ('fastsofa', 'biwewwef11231', 4);
+                SELECT * FROM credentials;
+                INSERT INTO orders (product, quantity, user_id) VALUES
+                                   ('grusha', 4, 2),
+                                   ('borukva', 1, 1),
+                                   ('chipsy', 1, 4),
+                                   ('cebula', 12, 3);
+                SELECT * FROM orders;
                 "
                 '''
             }
         }
+        stage('')
     }
     post{
         always{
