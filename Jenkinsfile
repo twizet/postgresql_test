@@ -60,6 +60,21 @@ pipeline {
                 '''
             }
         }
+        stage('Add data'){
+            steps{
+                echo "Adding new data";
+                sh '''
+                psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -c "
+                INSERT INTO users (name, email, active) VALUES
+                                  ('Vasia','vassia@gmail.com',false),
+                                  ('Kolia','kolich12@gmail.com'),
+                                  ('Katia','ekatrina@gmail.com',true),
+                                  ('Sofia','sof4a@gmail.com',true);
+                SELECT * FROM users;
+                "
+                '''
+            }
+        }
     }
     post{
         always{
