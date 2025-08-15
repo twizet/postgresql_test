@@ -87,7 +87,7 @@ pipeline {
                 '''
             }
         }
-        stage('')
+        
     }
     post{
         always{
