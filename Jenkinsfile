@@ -47,6 +47,19 @@ pipeline {
                 '''
             }
         }
+        stage('Creating Indexes'){
+            steps{
+                echo "Creating Indexes for easy SELECT";
+                sh '''
+                psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -c "
+                CREATE INDEX idx_users_email ON users(email);
+                CREATE INDEX idx_active_users ON users(email) WHERE active = true;
+                CREATE INDEX idx_created_at ON orders(created_at);
+                CREATE UNIQUE INDEX idx_user_login ON credentials(login);
+                "
+                '''
+            }
+        }
     }
     post{
         always{
